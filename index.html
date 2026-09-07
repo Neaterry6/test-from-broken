@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broken — WhatsApp AI Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a2e;
+      --purple: #7b2ff7;
+      --blue: #00d4ff;
+      --accent: linear-gradient(135deg, #7b2ff7, #00d4ff);
+      --text: #e2e2f0;
+      --muted: #8888a4;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(123,47,247,.15);
+    }
+    .logo { font-weight: 800; font-size: 1.4rem; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--blue); }
+    .nav-cta {
+      background: var(--accent); color: #fff; border: none; padding: .55rem 1.4rem;
+      border-radius: 50px; font-weight: 700; cursor: pointer; font-size: .9rem;
+      transition: opacity .2s, transform .2s;
+    }
+    .nav-cta:hover { opacity: .85; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 40%, rgba(123,47,247,.25), transparent),
+        radial-gradient(ellipse 40% 30% at 70% 60%, rgba(0,212,255,.12), transparent);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--surface2); border: 1px solid rgba(123,47,247,.3);
+      border-radius: 50px; padding: .4rem 1rem; font-size: .8rem; color: var(--blue);
+      margin-bottom: 1.5rem; position: relative;
+    }
+    .hero-badge span { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900; line-height: 1.05;
+      margin-bottom: 1rem; position: relative;
+    }
+    .hero h1 .gradient { background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.25rem; color: var(--muted); max-width: 560px; margin-bottom: 2rem; position: relative; }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: relative; }
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none; padding: .85rem 2rem;
+      border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer;
+      transition: opacity .2s, transform .2s;
+    }
+    .btn-primary:hover { opacity: .85; transform: translateY(-2px); }
+    .btn-secondary {
+      background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,.15);
+      padding: .85rem 2rem; border-radius: 50px; font-weight: 600; font-size: 1rem;
+      cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .btn-secondary:hover { border-color: var(--purple); background: rgba(123,47,247,.1); }
+
+    /* FEATURES */
+    .features { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .section-label { color: var(--blue); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: .5rem; }
+    .section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: 3rem; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius); padding: 2rem;
+      transition: border-color .25s, transform .25s, box-shadow .25s;
+    }
+    .feature-card:hover {
+      border-color: rgba(123,47,247,.4); transform: translateY(-4px);
+      box-shadow: 0 8px 40px rgba(123,47,247,.15);
+    }
+    .feature-icon { width: 48px; height: 48px; margin-bottom: 1rem; }
+    .feature-icon svg { width: 100%; height: 100%; }
+    .feature-card h3 { font-size: 1.15rem; margin-bottom: .5rem; }
+    .feature-card p { color: var(--muted); font-size: .9rem; }
+
+    /* ABOUT */
+    .about { padding: 6rem 2rem; max-width: 900px; margin: 0 auto; }
+    .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .about-text p { color: var(--muted); margin-bottom: 1rem; }
+    .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat-card {
+      background: var(--surface); border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius); padding: 1.5rem; text-align: center;
+    }
+    .stat-card .num { font-size: 2rem; font-weight: 900; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-card .label { color: var(--muted); font-size: .8rem; margin-top: .25rem; }
+
+    /* MOCKUP */
+    .mockup-section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .mockup-container {
+      display: flex; gap: 3rem; align-items: center; flex-wrap: wrap; justify-content: center;
+    }
+    .phone-mockup {
+      width: 320px; background: #0b141a;
+      border-radius: 32px; border: 3px solid #2a2a3a;
+      overflow: hidden; box-shadow: 0 20px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
+    }
+    .phone-header {
+      background: #1f2c33; padding: .6rem 1rem; display: flex; align-items: center; gap: .7rem;
+    }
+    .phone-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .8rem; }
+    .phone-name { font-weight: 600; font-size: .9rem; }
+    .phone-status { font-size: .7rem; color: #00a884; }
+    .chat-body { padding: 1rem; display: flex; flex-direction: column; gap: .5rem; min-height: 380px; }
+    .chat-date { text-align: center; font-size: .7rem; color: #667791; margin: .5rem 0; }
+    .msg { max-width: 82%; padding: .55rem .85rem; border-radius: 10px; font-size: .82rem; line-height: 1.4; position: relative; }
+    .msg-in { background: #1f2c33; align-self: flex-start; border-top-left-radius: 2px; }
+    .msg-out { background: #005c4b; align-self: flex-end; border-top-right-radius: 2px; }
+    .msg-time { font-size: .6rem; color: rgba(255,255,255,.45); text-align: right; margin-top: .2rem; }
+    .typing-indicator { align-self: flex-start; background: #1f2c33; padding: .7rem 1rem; border-radius: 10px; border-top-left-radius: 2px; display: flex; gap: 4px; align-items: center; }
+    .typing-dot { width: 6px; height: 6px; background: #667791; border-radius: 50%; animation: typingBounce 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes typingBounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+    .mockup-info { flex: 1; min-width: 260px; }
+    .mockup-info h2 { font-size: 2rem; margin-bottom: 1rem; }
+    .mockup-info p { color: var(--muted); margin-bottom: 1.5rem; }
+    .mockup-features { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+    .mockup-features li { display: flex; align-items: center; gap: .75rem; color: var(--text); font-size: .95rem; }
+    .mockup-features li svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 3rem 2rem; text-align: center;
+    }
+    .footer-inner { max-width: 600px; margin: 0 auto; }
+    .footer-logo { font-size: 1.5rem; font-weight: 900; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: .75rem; }
+    .footer-text { color: var(--muted); font-size: .85rem; margin-bottom: 1.5rem; }
+    .footer-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: .85rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--blue); }
+    .footer-copy { color: var(--muted); font-size: .75rem; margin-top: 2rem; opacity: .6; }
+
+    /* ANIMATIONS */
+    .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .about-content { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Broken</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#demo">Demo</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('demo').scrollIntoView()">Try Broken</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span></span> Powered by Sapiens AI</div>
+  <h1 class="fade-up">Meet <span class="gradient">Broken</span></h1>
+  <p class="fade-up">Your personal AI execution assistant — right inside WhatsApp. Chat, code, search, generate images, and get things done faster than ever.</p>
+  <div class="hero-buttons fade-up">
+    <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView()">See It In Action</button>
+    <button class="btn-secondary" onclick="document.getElementById('features').scrollIntoView()">Explore Features</button>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label fade-up">Features</div>
+  <h2 class="section-title fade-up">Everything you need, in one chat</h2>
+  <div class="features-grid">
+
+    <div class="feature-card fade-up">
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="8" width="40" height="28" rx="6" stroke="#7b2ff7" stroke-width="2.5"/>
+          <path d="M16 36l-8 6v-4" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="20" r="2" fill="#7b2ff7"/>
+          <circle cx="26" cy="20" r="2" fill="#00d4ff"/>
+          <circle cx="34" cy="20" r="2" fill="#7b2ff7"/>
+        </svg>
+      </div>
+      <h3>Smart Chat</h3>
+      <p>Natural conversations with an AI that understands context, remembers your preferences, and responds instantly.</p>
+    </div>
+
+    <div class="feature-card fade-up">
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 36V16l18-6v20" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="14" cy="28" r="6" stroke="#7b2ff7" stroke-width="2.5"/>
+          <path d="M38 14a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" fill="#7b2ff7"/>
+          <path d="M36 18l4 4-4 4" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Music & Media</h3>
+      <p>Find songs, get lyrics, generate playlists, and control playback — all through a simple WhatsApp message.</p>
+    </div>
+
+    <div class="feature-card fade-up">
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="10" width="36" height="28" rx="4" stroke="#7b2ff7" stroke-width="2.5"/>
+          <path d="M16 20l-4 4 4 4" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M28 28l4-4-4-4" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="24" y1="34" x2="24" y2="22" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Code Assistant</h3>
+      <p>Write, debug, and explain code in any language. Paste your error and Broken fixes it in seconds.</p>
+    </div>
+
+    <div class="feature-card fade-up">
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="6" width="36" height="36" rx="8" stroke="#7b2ff7" stroke-width="2.5"/>
+          <circle cx="18" cy="20" r="4" stroke="#00d4ff" stroke-width="2"/>
+          <path d="M6 34l10-10 6 6 8-12 10 10" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Image Generation</h3>
+      <p>Describe any image and watch it come to life. Perfect for thumbnails, concepts, and creative assets.</p>
+    </div>
+
+    <div class="feature-card fade-up">
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="22" cy="22" r="14" stroke="#7b2ff7" stroke-width="2.5"/>
+          <path d="M32 32l10 10" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M14 22h16M22 14v16" stroke="#00d4ff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M8 22a14 14 0 0 1 24-8" stroke="#7b2ff7" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <h3>Web Search</h3>
+      <p>Real-time search across the web. Get answers, summaries, and sources without leaving the chat.</p>
+    </div>
+
+    <div class="feature-card fade-up">
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 4l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z" stroke="#7b2ff7" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+          <circle cx="24" cy="24" r="6" fill="#00d4ff" opacity=".3"/>
+        </svg>
+      </div>
+      <h3>Task Automation</h3>
+      <p>Set reminders, send messages, manage calendars, and automate repetitive tasks through natural language.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="section-label fade-up">About</div>
+  <h2 class="section-title fade-up">What I do</h2>
+  <div class="about-content">
+    <div class="about-text fade-up">
+      <p>Broken is a WhatsApp AI agent assistant built by <strong style="color:var(--blue)">Sapiens AI</strong>. I design and develop intelligent automation tools that merge conversational AI with real-world execution.</p>
+      <p>From code generation to image creation, from web search to music discovery — Broken handles it all through the interface you already use every day: WhatsApp.</p>
+      <p>My focus is on making AI feel invisible. No apps to install, no learning curve — just type and get results, instantly.</p>
+    </div>
+    <div class="about-stats fade-up">
+      <div class="stat-card">
+        <div class="num">6+</div>
+        <div class="label">Core Capabilities</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">24/7</div>
+        <div class="label">Always Available</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">&lt;1s</div>
+        <div class="label">Response Time</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">100%</div>
+        <div class="label">Via WhatsApp</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOCKUP -->
+<section class="mockup-section" id="demo">
+  <div class="section-label fade-up">Demo</div>
+  <h2 class="section-title fade-up">See it in action</h2>
+  <div class="mockup-container">
+
+    <div class="phone-mockup fade-up">
+      <div class="phone-header">
+        <div class="phone-avatar">B</div>
+        <div>
+          <div class="phone-name">Broken</div>
+          <div class="phone-status">online</div>
+        </div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="chat-date">Today</div>
+        <div class="msg msg-out">Hey Broken, can you find me a song about coding? 🎵</div>
+        <div class="msg msg-in">Sure! Here's something I think you'll like: <em>"Code Code Code" — OMD</em> 🎶<br>Want me to add it to a playlist?</div>
+        <div class="msg msg-out">Yes! Also generate an image of a robot programmer in a neon city</div>
+        <div class="msg msg-in">🎧 Added to "Coding Vibes" playlist.<br>🎨 Generating your image now…</div>
+        <div class="typing-indicator" id="typingIndicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup-info fade-up">
+      <h2>Chat naturally.<br><span style="background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Get results instantly.</span></h2>
+      <p>Every feature accessible through the simplicity of a text message. No menus, no buttons — just talk to Broken and let it handle the rest.</p>
+      <ul class="mockup-features">
+        <li>
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#7b2ff7" stroke-width="2"/><path d="M6 10l3 3 5-6" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Replies in under a second
+        </li>
+        <li>
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#7b2ff7" stroke-width="2"/><path d="M6 10l3 3 5-6" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Remembers conversation context
+        </li>
+        <li>
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#7b2ff7" stroke-width="2"/><path d="M6 10l3 3 5-6" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Works across 50+ countries
+        </li>
+        <li>
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#7b2ff7" stroke-width="2"/><path d="M6 10l3 3 5-6" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          End-to-end encrypted
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Broken</div>
+    <p class="footer-text">A WhatsApp AI agent assistant by Sapiens AI — making intelligent automation feel like a conversation.</p>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="#demo">Demo</a>
+      <a href="https://sapiensai.com" target="_blank" rel="noopener">Sapiens AI</a>
+    </div>
+    <p class="footer-copy">© 2026 Sapiens AI. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Auto-replay chat on scroll into view
+  const chatObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const ti = document.getElementById('typingIndicator');
+        if (ti) ti.style.display = 'flex';
+      } else {
+        const ti = document.getElementById('typingIndicator');
+        if (ti) ti.style.display = 'none';
+      }
+    });
+  }, { threshold: 0.3 });
+  const chatBody = document.getElementById('chatBody');
+  if (chatBody) chatObserver.observe(chatBody);
+</script>
+</body>
+</html>
